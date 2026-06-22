@@ -406,14 +406,61 @@
 
     </div>
 
-    <!-- Teaser figure -->
-    <div class="teaser-wrap">
-      <img src="static/images/teaser.png" alt="LongVQUBench overview" style="width:100%; border-radius:10px; border:1px solid var(--border);">
-      <p class="fig-caption">
-        LongVQUBench aggregates long-form videos from diverse sources and evaluates LVLMs
-        across three hierarchical levels of video quality understanding.
+  
+
+    <!-- ── TEASER VIDEO ── -->
+<section id="teaser-video" style="padding: 48px 0; border-top: 1px solid var(--border);">
+  <div class="container">
+    <div class="section-label">Example</div>
+    <h2 class="section-title">Sample Question from LongVQUBench</h2>
+    <p style="color:var(--muted); font-size:15px; margin-bottom:32px;">
+      LongVQUBench features perceptual quality reasoning questions that require integrating
+      visual evidence across extended video durations moving beyond what a single frame can reveal.
+    </p>
+
+    <!-- Video -->
+    <video
+      id="teaser-vid"
+      controls
+      muted
+      loop
+      style="width:100%; border-radius:var(--radius); border:1px solid var(--border); margin-bottom:28px;">
+      <source src="static/videos/Video_2236.mp4" type="video/mp4">
+    </video>
+
+    <!-- QA Card -->
+    <div style="background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:28px 32px;">
+
+      <!-- Level badge -->
+      <span class="badge badge-gqu" style="margin-bottom:16px; display:inline-block;">GQU · Global Quality Understanding</span>
+
+      <!-- Question -->
+      <p style="font-size:15px; font-weight:600; color:var(--heading); margin-bottom:20px;">
+       Question. Which distortion type has the strongest influence on the viewer's global perception of video quality?
       </p>
+
+      <!-- Options -->
+      <ul style="list-style:none; display:flex; flex-direction:column; gap:10px;">
+       <li style="background:rgba(79,202,139,0.08); border:1px solid var(--accent3); border-radius:8px; padding:10px 16px; font-size:14px; color:var(--accent3); font-weight:600;">
+          ✅ &nbsp; A. &nbsp; Spatial sharpen &nbsp;<span style="font-size:12px; opacity:0.8;">(Correct Answer)</span>
+        </li>
+        <li style="background:var(--surface2); border:1px solid var(--border); border-radius:8px; padding:10px 16px; font-size:14px; color:var(--text);">
+          B. &nbsp; Temporal jitter
+        </li>
+        <li style="background:var(--surface2); border:1px solid var(--border); border-radius:8px; padding:10px 16px; font-size:14px; color:var(--text);">
+          C. &nbsp; Frame rate inconsistency
+        </li>
+        <li style="background:var(--surface2); border:1px solid var(--border); border-radius:8px; padding:10px 16px; font-size:14px; color:var(--text);">
+          D. &nbsp; Color banding
+        </li>
+      </ul>
+
     </div>
+  </div>
+</section>
+<!-- ── END TEASER VIDEO ── -->
+
+    
 
   </div>
 </section>
