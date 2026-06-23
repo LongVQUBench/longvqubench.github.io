@@ -189,39 +189,35 @@
     text-align: left;
   }
   .stats-chart {
-    flex: 0 0 320px;
-  }
-  .stats-chart img {
-    width: 100%;
-  }
-  .stats-pills {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-  }
-  .stat-pill {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 18px 24px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    transition: border-color .2s;
-  }
-  .stat-pill:hover { border-color: var(--accent); }
-  .stat-pill .val {
-    font-family: var(--mono);
-    font-weight: 700;
-    font-size: 28px;
-    color: var(--accent);
-  }
-  .stat-pill .lbl {
-    font-size: 15px;
-    font-weight: 600;
-    color: var(--text);
-  }
+  flex: 0 0 50%;
+}
+.stats-pills {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.stat-pill {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 10px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  transition: border-color .2s;
+}
+.stat-pill .val {
+  font-family: var(--mono);
+  font-weight: 700;
+  font-size: 20px;
+  color: var(--accent);
+}
+.stat-pill .lbl {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+}
 
 /* responsive */
 @media (max-width: 700px) {
@@ -440,14 +436,7 @@
 
      
 
-    <!-- <!-- Stats -->
-    <div class="stats-row">
-      <div class="stat-pill"><span class="val">1,200</span><span class="lbl">Videos</span></div>
-      <div class="stat-pill"><span class="val">1,500</span><span class="lbl">QA Pairs</span></div>
-      <div class="stat-pill"><span class="val">~12 min</span><span class="lbl">Avg. Duration</span></div>
-      <div class="stat-pill"><span class="val">14</span><span class="lbl">LVLMs Evaluated</span></div>
-
-    </div> -->
+   
 
 
     <!-- Stats -->
