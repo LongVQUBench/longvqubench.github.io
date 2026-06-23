@@ -180,22 +180,54 @@
     .btn-outline { background: transparent; color: var(--text); border: 1px solid var(--border); }
     .btn-outline:hover { border-color: var(--accent); color: var(--accent); transform: translateY(-1px); }
 
-    /* ── STAT PILLS ── */
-    .stats-row {
-      display: flex; flex-wrap: wrap;
-      justify-content: center;
-      gap: 10px; margin-bottom: 16px;
-    }
-    .stat-pill {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 999px;
-      padding: 7px 18px;
-      font-size: 14px;
-      display: flex; align-items: center; gap: 7px;
-    }
-    .stat-pill .val { font-family: var(--mono); font-weight: 600; color: var(--accent); }
-    .stat-pill .lbl { color: var(--muted); }
+   /* ── STATS HERO ── */
+  .stats-hero {
+    display: flex;
+    align-items: center;
+    gap: 48px;
+    margin-top: 48px;
+    text-align: left;
+  }
+  .stats-chart {
+    flex: 0 0 320px;
+  }
+  .stats-chart img {
+    width: 100%;
+  }
+  .stats-pills {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+  .stat-pill {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 18px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    transition: border-color .2s;
+  }
+  .stat-pill:hover { border-color: var(--accent); }
+  .stat-pill .val {
+    font-family: var(--mono);
+    font-weight: 700;
+    font-size: 28px;
+    color: var(--accent);
+  }
+  .stat-pill .lbl {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text);
+  }
+
+/* responsive */
+@media (max-width: 700px) {
+  .stats-hero { flex-direction: column; }
+  .stats-chart { flex: 0 0 auto; width: 100%; }
+}
 
     /* ── TEASER FIGURE ── */
     .teaser-wrap {
@@ -408,14 +440,42 @@
 
      
 
-    <!-- Stats -->
+    <!-- <!-- Stats -->
     <div class="stats-row">
       <div class="stat-pill"><span class="val">1,200</span><span class="lbl">Videos</span></div>
       <div class="stat-pill"><span class="val">1,500</span><span class="lbl">QA Pairs</span></div>
       <div class="stat-pill"><span class="val">~12 min</span><span class="lbl">Avg. Duration</span></div>
       <div class="stat-pill"><span class="val">14</span><span class="lbl">LVLMs Evaluated</span></div>
 
-    </div>
+    </div> -->
+
+
+    <!-- Stats -->
+      <div class="stats-hero">
+        <!-- Left: chart -->
+        <div class="stats-chart">
+          <img src="static/images/nobg_chart.png" alt="LongVQUBench framework chart">
+        </div>
+        <!-- Right: pills -->
+        <div class="stats-pills">
+          <div class="stat-pill">
+            <span class="val">1,200</span>
+            <span class="lbl">Videos</span>
+          </div>
+          <div class="stat-pill">
+            <span class="val">1,500</span>
+            <span class="lbl">QA Pairs</span>
+          </div>
+          <div class="stat-pill">
+            <span class="val">~12 min</span>
+            <span class="lbl">Avg. Duration</span>
+          </div>
+          <div class="stat-pill">
+            <span class="val">14</span>
+            <span class="lbl">LVLMs Evaluated</span>
+          </div>
+        </div>
+      </div>
 
   
 
