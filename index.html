@@ -664,6 +664,440 @@
 </section>
 
 <!-- ── LEADERBOARD ── -->
+
+
+<section id="lvqub-board">
+  <style>
+    #lvqub-board {
+      --ink: #e9ece9;
+      --ink-dim: #9aa39c;
+      --field: #10130f;
+      --field-raised: #171b15;
+      --line: #2a3128;
+      --signal: #5be49b;      /* healthy / high score */
+      --signal-dim: #3a7a5c;
+      --alert: #e8935a;       /* degraded / low score */
+      --lqu-color: #6fa8dc;   /* blue — Local Event Quality */
+      --cqr-color: #b06a4f;   /* brownish-red — Cross-Event Reasoning */
+      --gqu-color: #5fb87d;   /* green — Global Quality */
+      --tag-closed: #e0af4f;
+      --tag-video: #b48cff;
+      --tag-agent: #ff8fb3;
+      --mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+      --display: 'Space Grotesk', 'Inter', system-ui, sans-serif;
+
+      background: var(--field);
+      color: var(--ink);
+      font-family: var(--display);
+      padding: 48px clamp(16px, 4vw, 56px);
+      border-radius: 4px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    #lvqub-board::before {
+      /* faint scanline texture, evokes frame-sampling / video signal */
+      content: "";
+      position: absolute; inset: 0;
+      background: repeating-linear-gradient(
+        180deg, rgba(233,236,233,0.025) 0px, rgba(233,236,233,0.025) 1px,
+        transparent 1px, transparent 3px
+      );
+      pointer-events: none;
+    }
+
+    #lvqub-board * { box-sizing: border-box; }
+
+    #lvqub-board .lvqub-head {
+      position: relative;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: flex-end;
+      gap: 20px;
+      border-bottom: 1px solid var(--line);
+      padding-bottom: 20px;
+      margin-bottom: 24px;
+    }
+
+    #lvqub-board .lvqub-eyebrow {
+      font-family: var(--mono);
+      font-size: 12px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--signal);
+      margin: 0 0 10px;
+    }
+
+    #lvqub-board h2 {
+      font-size: clamp(24px, 3vw, 32px);
+      margin: 0;
+      font-weight: 600;
+      letter-spacing: -0.01em;
+    }
+
+    #lvqub-board .lvqub-sub {
+      color: var(--ink-dim);
+      font-size: 13.5px;
+      max-width: 46ch;
+      line-height: 1.5;
+      margin-top: 6px;
+    }
+
+    #lvqub-board .lvqub-source {
+      font-family: var(--mono);
+      font-size: 12px;
+      color: var(--ink-dim);
+      text-align: right;
+    }
+    #lvqub-board .lvqub-source a { color: var(--signal); text-decoration: none; border-bottom: 1px solid var(--signal-dim); }
+    #lvqub-board .lvqub-source a:hover { color: var(--ink); border-color: var(--ink); }
+
+    /* ---- filter tabs ---- */
+    #lvqub-board .lvqub-tabs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 18px;
+      flex-wrap: wrap;
+      position: relative;
+    }
+    #lvqub-board .lvqub-tab {
+      font-family: var(--mono);
+      font-size: 12px;
+      letter-spacing: 0.03em;
+      background: transparent;
+      color: var(--ink-dim);
+      border: 1px solid var(--line);
+      padding: 7px 14px;
+      border-radius: 999px;
+      cursor: pointer;
+      transition: border-color .15s ease, color .15s ease, background .15s ease;
+    }
+    #lvqub-board .lvqub-tab:hover { color: var(--ink); border-color: var(--ink-dim); }
+    #lvqub-board .lvqub-tab .dot {
+      display: inline-block;
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      margin-right: 7px;
+      vertical-align: middle;
+      background: currentColor;
+    }
+    #lvqub-board .lvqub-tab .dot.closed { background: var(--tag-closed); }
+    #lvqub-board .lvqub-tab .dot.video { background: var(--tag-video); }
+    #lvqub-board .lvqub-tab .dot.agent { background: var(--tag-agent); }
+
+    /* ---- in-table section header rows ---- */
+    #lvqub-board tr.lvqub-section td {
+      background: var(--field);
+      font-family: var(--mono);
+      font-size: 10.5px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      text-align: left;
+      padding: 9px 10px;
+      border-top: 1px solid var(--line);
+      border-bottom: 1px solid var(--line);
+      position: relative;
+    }
+    #lvqub-board tr.lvqub-section:first-child td { border-top: none; }
+    #lvqub-board tr.lvqub-section td { position: sticky; left: 0; }
+    #lvqub-board tr.lvqub-section.closed td { color: var(--tag-closed); }
+    #lvqub-board tr.lvqub-section.video td { color: var(--tag-video); }
+    #lvqub-board tr.lvqub-section.agent td { color: var(--tag-agent); }
+    #lvqub-board tr.lvqub-section .count { color: var(--ink-dim); text-transform: none; letter-spacing: 0; margin-left: 8px; }
+
+    /* ---- table ---- */
+    #lvqub-board .lvqub-tablewrap {
+      position: relative;
+      overflow-x: auto;
+      border: 1px solid var(--line);
+      border-radius: 3px;
+      background: var(--field-raised);
+    }
+    #lvqub-board table {
+      border-collapse: collapse;
+      width: 100%;
+      min-width: 980px;
+      font-family: var(--mono);
+      font-size: 12.5px;
+    }
+    #lvqub-board thead th {
+      position: sticky;
+      top: 0;
+      background: var(--field-raised);
+      z-index: 2;
+      font-weight: 500;
+      text-align: center;
+      color: var(--ink-dim);
+      border-bottom: 1px solid var(--line);
+      padding: 10px 8px;
+      white-space: nowrap;
+    }
+    #lvqub-board thead tr.lvqub-grouprow th {
+      font-size: 10.5px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 8px;
+      border-bottom: 1px solid var(--line);
+    }
+    #lvqub-board thead tr.lvqub-grouprow th.g-lqu { color: var(--lqu-color); }
+    #lvqub-board thead tr.lvqub-grouprow th.g-cqr { color: var(--cqr-color); }
+    #lvqub-board thead tr.lvqub-grouprow th.g-gqu { color: var(--gqu-color); }
+
+    /* Subtle column-group tinting so LQU / CQR / GQU read as visual blocks,
+       matching the paper's three metric families. Columns: 1 model, 2 #F,
+       3-6 LQU (D,L,C,SA), 7-10 CQR (CMP,CE,I,TR), 11-14 GQU (SE,DFI,TA,OE), 15 overall */
+    #lvqub-board table thead tr:last-child th:nth-child(n+3):nth-child(-n+6),
+    #lvqub-board table td:nth-child(n+3):nth-child(-n+6) {
+      background-color: rgba(111, 168, 220, 0.07);
+    }
+    #lvqub-board table thead tr:last-child th:nth-child(n+7):nth-child(-n+10),
+    #lvqub-board table td:nth-child(n+7):nth-child(-n+10) {
+      background-color: rgba(176, 106, 79, 0.09);
+    }
+    #lvqub-board table thead tr:last-child th:nth-child(n+11):nth-child(-n+14),
+    #lvqub-board table td:nth-child(n+11):nth-child(-n+14) {
+      background-color: rgba(95, 184, 125, 0.07);
+    }
+    #lvqub-board thead tr.lvqub-grouprow th.g-lqu { background-color: rgba(111, 168, 220, 0.1); }
+    #lvqub-board thead tr.lvqub-grouprow th.g-cqr { background-color: rgba(176, 106, 79, 0.13); }
+    #lvqub-board thead tr.lvqub-grouprow th.g-gqu { background-color: rgba(95, 184, 125, 0.1); }
+    #lvqub-board tbody tr:hover td:nth-child(n+3):nth-child(-n+6) { background-color: rgba(111, 168, 220, 0.12); }
+    #lvqub-board tbody tr:hover td:nth-child(n+7):nth-child(-n+10) { background-color: rgba(176, 106, 79, 0.14); }
+    #lvqub-board tbody tr:hover td:nth-child(n+11):nth-child(-n+14) { background-color: rgba(95, 184, 125, 0.12); }
+    /* section divider rows always span full width — no per-column tint */
+    #lvqub-board tr.lvqub-section td { background-color: var(--field) !important; }
+
+    #lvqub-board th.lvqub-sortable { cursor: pointer; user-select: none; }
+    #lvqub-board th.lvqub-sortable:hover { color: var(--ink); }
+    #lvqub-board th.lvqub-sortable .arrow { opacity: 0; font-size: 9px; margin-left: 2px; }
+    #lvqub-board th.lvqub-sortable.active .arrow { opacity: 1; color: var(--signal); }
+
+    #lvqub-board th.col-model { text-align: left; position: sticky; left: 0; z-index: 3; }
+    #lvqub-board td.col-model { text-align: left; position: sticky; left: 0; background: var(--field-raised); z-index: 1; }
+
+    #lvqub-board tbody td {
+      text-align: center;
+      padding: 9px 8px;
+      color: var(--ink);
+      border-bottom: 1px solid rgba(42,49,40,0.6);
+      white-space: nowrap;
+    }
+    #lvqub-board tbody tr:hover td { background: rgba(91,228,155,0.05); }
+    #lvqub-board tbody tr:hover td.col-model { background: rgba(91,228,155,0.08); }
+
+    #lvqub-board .model-name { font-family: var(--display); font-weight: 600; font-size: 13.5px; }
+
+    #lvqub-board .best { color: var(--ink); font-weight: 700; }
+    #lvqub-board .second { text-decoration: underline; text-decoration-color: var(--ink-dim); text-underline-offset: 3px; }
+
+    #lvqub-board td.col-overall {
+      font-weight: 700;
+      color: var(--ink);
+    }
+    #lvqub-board .overall-cell { display: flex; align-items: center; gap: 8px; justify-content: center; }
+    #lvqub-board .bar-track { width: 46px; height: 4px; background: var(--line); border-radius: 2px; overflow: hidden; }
+    #lvqub-board .bar-fill { height: 100%; background: var(--signal); }
+
+    #lvqub-board .lvqub-foot {
+      margin-top: 16px;
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+      font-size: 11.5px;
+      color: var(--ink-dim);
+      font-family: var(--mono);
+      line-height: 1.6;
+    }
+
+    @media (max-width: 640px) {
+      #lvqub-board { padding: 28px 16px; }
+      #lvqub-board .lvqub-head { flex-direction: column; align-items: flex-start; }
+      #lvqub-board .lvqub-source { text-align: left; }
+    }
+  </style>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+
+  <div class="lvqub-head">
+    <div>
+      <p class="lvqub-eyebrow">// Leaderboard</p>
+      <h2>LongVQUBench</h2>
+      <p class="lvqub-sub">Accuracy (%) of 14 LVLMs for MCQ questions on long-term video quality understanding, across LQU, CQR, and GQU hierarchical levels.</p>
+    </div>
+
+  </div>
+
+  <!-- <div class="lvqub-tabs" role="tablist">
+    <button class="lvqub-tab" data-jump="closed"><span class="dot closed"></span>Proprietary</button>
+    <button class="lvqub-tab" data-jump="video"><span class="dot video"></span>Open-source</button>
+    <button class="lvqub-tab" data-jump="agent"><span class="dot agent"></span>Agentic</button>
+  </div> -->
+
+  <div class="lvqub-tablewrap">
+    <table>
+      <thead>
+        <tr class="lvqub-grouprow">
+          <th></th><th></th>
+          <th class="g-lqu" colspan="4">Local Event Quality (LQU)</th>
+          <th class="g-cqr" colspan="4">Cross-Event Reasoning (CQR)</th>
+          <th class="g-gqu" colspan="4">Global Quality (GQU)</th>
+          <th></th>
+        </tr>
+        <tr>
+          <th class="col-model lvqub-sortable" data-key="model">Model <span class="arrow">▲</span></th>
+          <th class="lvqub-sortable" data-key="frames" title="Number of sampled frames">#F <span class="arrow">▲</span></th>
+          <th class="lvqub-sortable" data-key="D" title="Detection">D <span class="arrow">▲</span></th>
+          <th class="lvqub-sortable" data-key="L" title="Localization">L <span class="arrow">▲</span></th>
+          <th class="lvqub-sortable" data-key="C" title="Classification">C <span class="arrow">▲</span></th>
+          <th class="lvqub-sortable" data-key="SA" title="Severity & Comfort Assessment">SA <span class="arrow">▲</span></th>
+          <th class="lvqub-sortable" data-key="CMP" title="Comparison">CMP <span class="arrow">▲</span></th>
+          <th class="lvqub-sortable" data-key="CE" title="Cumulative Effect">CE <span class="arrow">▲</span></th>
+          <th class="lvqub-sortable" data-key="I" title="Integration">I <span class="arrow">▲</span></th>
+          <th class="lvqub-sortable" data-key="TR" title="Temporal Relation">TR <span class="arrow">▲</span></th>
+          <th class="lvqub-sortable" data-key="SE" title="Stability Evaluation">SE <span class="arrow">▲</span></th>
+          <th class="lvqub-sortable" data-key="DFI" title="Dominant Factor Identification">DFI <span class="arrow">▲</span></th>
+          <th class="lvqub-sortable" data-key="TA" title="Trend Assessment">TA <span class="arrow">▲</span></th>
+          <th class="lvqub-sortable" data-key="OE" title="Overall Evaluation">OE <span class="arrow">▲</span></th>
+          <th class="lvqub-sortable active" data-key="overall" title="Overall accuracy">Overall <span class="arrow">▼</span></th>
+        </tr>
+      </thead>
+      <tbody id="lvqub-tbody"></tbody>
+    </table>
+  </div>
+
+  <div class="lvqub-foot">
+    <span><span class="best">bold</span> = best per column · <span class="second">underline</span> = second-best per column</span>
+    <span>D Detection · L Localization · C Classification · SA Severity/Comfort · CMP Comparison · CE Cumulative Effect · I Integration · TR Temporal Relation · SE Stability · DFI Dominant Factor · TA Trend · OE Overall Eval</span>
+  </div>
+
+  <script>
+  (function () {
+    var data = [
+      { model: "GPT-5",              group: "closed", frames: 256, D: 84.6, L: 71.5, C: 56.5, SA: 49.0, CMP: 71.5, CE: 87.6, I: 86.5, TR: 83.0, SE: 68.5, DFI: 65.0, TA: 48.5, OE: 61.5, overall: 69.5 },
+      { model: "Gemini-3",            group: "closed", frames: 128, D: 76.5, L: 68.0, C: 54.0, SA: 48.0, CMP: 70.0, CE: 85.0, I: 82.0, TR: 80.0, SE: 67.0, DFI: 63.0, TA: 47.5, OE: 60.0, overall: 66.8 },
+      { model: "Qwen-VL-Max",         group: "closed", frames: 64,  D: 70.0, L: 65.5, C: 51.0, SA: 44.0, CMP: 68.0, CE: 84.0, I: 80.0, TR: 77.0, SE: 65.0, DFI: 60.0, TA: 45.5, OE: 58.0, overall: 64.0 },
+
+      { model: "LLaVA-NeXT-Video",    group: "video",  frames: 8,   D: 35.0, L: 58.7, C: 46.7, SA: 38.3, CMP: 61.7, CE: 70.3, I: 74.7, TR: 73.3, SE: 58.3, DFI: 50.3, TA: 58.3, OE: 51.7, overall: 56.4 },
+      { model: "ShareGPT4Video",      group: "video",  frames: 16,  D: 26.5, L: 34.6, C: 28.0, SA: 32.6, CMP: 24.6, CE: 35.2, I: 34.0, TR: 33.0, SE: 23.6, DFI: 28.0, TA: 23.5, OE: 26.0, overall: 29.1 },
+      { model: "Qwen3-VL",            group: "video",  frames: 64,  D: 46.5, L: 62.5, C: 47.0, SA: 46.2, CMP: 65.0, CE: 78.2, I: 75.0, TR: 72.1, SE: 64.0, DFI: 60.0, TA: 48.5, OE: 58.5, overall: 60.3 },
+      { model: "MovieChat",           group: "video",  frames: 64,  D: 25.2, L: 41.8, C: 30.0, SA: 23.0, CMP: 36.5, CE: 43.6, I: 41.2, TR: 39.3, SE: 44.0, DFI: 40.0, TA: 25.0, OE: 38.0, overall: 35.6 },
+      { model: "LLaVA-Video",         group: "video",  frames: 8,   D: 30.5, L: 57.0, C: 43.0, SA: 36.0, CMP: 66.0, CE: 76.0, I: 72.0, TR: 68.0, SE: 59.0, DFI: 54.0, TA: 39.0, OE: 53.0, overall: 54.5 },
+      { model: "VQA²",                group: "video",  frames: 8,   D: 62.5, L: 53.6, C: 48.0, SA: 41.5, CMP: 60.5, CE: 49.0, I: 75.0, TR: 72.0, SE: 48.2, DFI: 59.0, TA: 44.0, OE: 37.5, overall: 54.2 },
+      { model: "Long-RL",             group: "video",  frames: 64,  D: 73.3, L: 74.3, C: 48.3, SA: 51.7, CMP: 38.3, CE: 53.3, I: 93.3, TR: 83.3, SE: 53.3, DFI: 63.3, TA: 48.3, OE: 38.3, overall: 59.9 },
+
+      { model: "VideoAgent",          group: "agent",  frames: null, D: 25.0, L: 30.5, C: 30.5, SA: 28.5, CMP: 29.5, CE: 35.0, I: 47.5, TR: 48.0, SE: 33.5, DFI: 40.6, TA: 33.0, OE: 40.6, overall: 35.2 },
+      { model: "VideoExplorer",       group: "agent",  frames: null, D: 33.5, L: 49.0, C: 35.0, SA: 40.2, CMP: 52.0, CE: 57.0, I: 63.0, TR: 60.2, SE: 49.5, DFI: 44.0, TA: 42.5, OE: 43.5, overall: 47.5 },
+      { model: "LongVT",              group: "agent",  frames: null, D: 37.5, L: 62.0, C: 55.0, SA: 46.5, CMP: 43.0, CE: 56.0, I: 53.0, TR: 50.0, SE: 41.0, DFI: 37.5, TA: 27.0, OE: 37.0, overall: 45.5 },
+      { model: "DeepVideoDiscovery",  group: "agent",  frames: null, D: 77.3, L: 83.3, C: 56.3, SA: 59.7, CMP: 66.3, CE: 67.3, I: 81.3, TR: 73.3, SE: 63.3, DFI: 61.3, TA: 46.3, OE: 56.3, overall: 66.0 }
+    ];
+
+    var metricCols = ["D","L","C","SA","CMP","CE","I","TR","SE","DFI","TA","OE","overall"];
+    // Exactly the three sections used in the paper's Table 4, in the paper's order
+    var groupOrder = ["closed", "video", "agent"];
+    var groupTitle = {
+      closed: "Proprietary LVLMs",
+      video: "Open-Source LVLMs",
+      agent: "Agentic LVLMs"
+    };
+
+    // best / second-best per column, computed across ALL models (matches the paper,
+    // which bolds/underlines the global best/second-best regardless of section)
+    var ranks = {};
+    metricCols.forEach(function (key) {
+      var vals = data.map(function (d) { return d[key]; }).slice().sort(function (a, b) { return b - a; });
+      ranks[key] = { best: vals[0], second: vals[1] };
+    });
+
+    var maxOverall = Math.max.apply(null, data.map(function (d) { return d.overall; }));
+
+    var tbody = document.getElementById("lvqub-tbody");
+    var sortKey = "overall";
+    var sortDir = -1; // desc
+
+    function cellClass(key, val) {
+      if (val === ranks[key].best) return "best";
+      if (val === ranks[key].second) return "second";
+      return "";
+    }
+
+    function sortRows(rows) {
+      return rows.slice().sort(function (a, b) {
+        var av = sortKey === "model" ? a.model : a[sortKey];
+        var bv = sortKey === "model" ? b.model : b[sortKey];
+        if (typeof av === "string") return sortDir * av.localeCompare(bv);
+        av = av === null ? -1 : av;
+        bv = bv === null ? -1 : bv;
+        return sortDir === -1 ? (bv - av) : (av - bv);
+      });
+    }
+
+    function rowHtml(d) {
+      var metricTds = metricCols.slice(0, -1).map(function (key) {
+        return '<td class="' + cellClass(key, d[key]) + '">' + d[key].toFixed(1) + "</td>";
+      }).join("");
+
+      var pct = Math.max(4, Math.round((d.overall / maxOverall) * 100));
+
+      return (
+        '<tr>' +
+          '<td class="col-model"><span class="model-name">' + d.model + '</span></td>' +
+          '<td>' + (d.frames === null ? "—" : d.frames) + '</td>' +
+          metricTds +
+          '<td class="col-overall">' +
+            '<div class="overall-cell">' +
+              '<span class="' + cellClass("overall", d.overall) + '">' + d.overall.toFixed(1) + '</span>' +
+              '<span class="bar-track"><span class="bar-fill" style="width:' + pct + '%"></span></span>' +
+            '</div>' +
+          '</td>' +
+        '</tr>'
+      );
+    }
+
+    function render() {
+      var html = groupOrder.map(function (g) {
+        var rows = sortRows(data.filter(function (d) { return d.group === g; }));
+        var sectionRow =
+          '<tr class="lvqub-section ' + g + '" id="lvqub-sec-' + g + '">' +
+            '<td colspan="15">' + groupTitle[g] + '<span class="count">' + rows.length + ' model' + (rows.length === 1 ? "" : "s") + '</span></td>' +
+          '</tr>';
+        return sectionRow + rows.map(rowHtml).join("");
+      }).join("");
+      tbody.innerHTML = html;
+    }
+
+    document.querySelectorAll("#lvqub-board th.lvqub-sortable").forEach(function (th) {
+      th.addEventListener("click", function () {
+        var key = th.getAttribute("data-key");
+        if (sortKey === key) {
+          sortDir = -sortDir;
+        } else {
+          sortKey = key;
+          sortDir = -1;
+        }
+        document.querySelectorAll("#lvqub-board th.lvqub-sortable").forEach(function (t) {
+          t.classList.remove("active");
+          t.querySelector(".arrow").textContent = "▲";
+        });
+        th.classList.add("active");
+        th.querySelector(".arrow").textContent = sortDir === -1 ? "▼" : "▲";
+        render();
+      });
+    });
+
+    document.querySelectorAll("#lvqub-board .lvqub-tab").forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        var target = document.getElementById("lvqub-sec-" + btn.getAttribute("data-jump"));
+        if (target) target.scrollIntoView({ behavior: "smooth", block: "center" });
+      });
+    });
+
+    render();
+  })();
+  </script>
+</section>
  
 <!-- ── BIBTEX ── -->
 <section id="bibtex">
